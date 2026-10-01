@@ -1,0 +1,6 @@
+name = "cbor"
+version = "0.1.0"
+defaultTargets = ["Cbor"]
+
+[[lean_lib]]
+name = "Cbor"
