@@ -19,10 +19,10 @@ it is what makes the encoder safe to hand bytes to a verifier using the same dec
 `v.distinctKeys` says no map at any depth repeats a key, and `v.withinDepth` says nesting is within
 `maxDepth`. `decode v.encode` is the decoder run on the encoder's output, mapped to the underlying
 item, and `v.item.normalise` is `v` with every map's entries sorted into canonical order. The depth
-hypothesis is not vacuous: it admits every value nesting up to 1024 deep, which is every value the
-decoder itself can produce. The distinct-keys hypothesis is not doing the work either: a value the
-decoder produces never repeats a key, since the decoder refuses a repeated key (CBOR-5.3); that is
-not yet proved here and rests on the tests of that refusal.
+hypothesis is not vacuous: it admits every value nesting up to 1024 deep, which `decode_withinDepth`
+shows includes every value the decoder itself can produce. The distinct-keys hypothesis is not doing
+the work either: `decode_distinctKeys` shows every value the decoder produces satisfies it, because
+the decoder refuses a repeated key (CBOR-5.3).
 -/
 theorem decode_encode (v : Value) (hk : v.distinctKeys = true) (hd : v.withinDepth = true) :
     (decode v.encode).map (·.item) = .ok v.item.normalise := by

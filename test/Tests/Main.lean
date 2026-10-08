@@ -7,7 +7,7 @@ module
 import Tests.AppendixA
 import Tests.Encode
 import Tests.Decode
-import Tests.Proofs.Theorems
+import Tests.Proofs.Unique
 
 /-!
 Theorems pass by compiling. What runs here are the fixtures, whose value is agreement with bytes
