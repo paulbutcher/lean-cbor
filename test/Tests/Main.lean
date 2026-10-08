@@ -7,16 +7,19 @@ module
 import Tests.AppendixA
 import Tests.Encode
 import Tests.Decode
-import Tests.Proofs.Unique
+import Tests.Adversarial
+import Tests.Proofs.Prefix
 
 /-!
 Theorems pass by compiling. What runs here are the fixtures, whose value is agreement with bytes
 no proof could establish.
 -/
 
-def checks : List (String × Bool) := Tests.AppendixA.checks ++ Tests.Encode.checks ++ Tests.Decode.checks
+def checks : List (String × Bool) :=
+  Tests.AppendixA.checks ++ Tests.Encode.checks ++ Tests.Decode.checks ++ Tests.Adversarial.checks
 
 public def main : IO UInt32 := do
+  let checks := checks ++ (← Tests.Adversarial.ioChecks)
   let failed := checks.filter fun (_, passed) => !passed
   for (name, _) in failed do
     IO.eprintln s!"FAILED: {name}"
