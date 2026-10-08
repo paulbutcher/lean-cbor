@@ -10,3 +10,4 @@ public import Cbor.Head
 public import Cbor.Encode
 public import Cbor.Error
 public import Cbor.Decode
+public import Cbor.Query

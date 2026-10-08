@@ -8,6 +8,8 @@ import Tests.AppendixA
 import Tests.Encode
 import Tests.Decode
 import Tests.Adversarial
+import Tests.WebAuthn
+import Tests.Proofs.Query
 import Tests.Proofs.Prefix
 
 /-!
@@ -16,7 +18,8 @@ no proof could establish.
 -/
 
 def checks : List (String × Bool) :=
-  Tests.AppendixA.checks ++ Tests.Encode.checks ++ Tests.Decode.checks ++ Tests.Adversarial.checks
+  Tests.AppendixA.checks ++ Tests.Encode.checks ++ Tests.Decode.checks ++
+    Tests.Adversarial.checks ++ Tests.WebAuthn.checks
 
 public def main : IO UInt32 := do
   let checks := checks ++ (← Tests.Adversarial.ioChecks)

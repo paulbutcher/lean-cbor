@@ -185,6 +185,13 @@ def ofInt? (i : Int) : Option Key :=
   else if -2 ^ 64 ≤ i ∧ i < 0 then some (.nint (-1 - i).toNat.toUInt64)
   else none
 
+/-- `Key.ofInt (-2)` is the COSE label `-2`. The bound is what stops a label out of range from
+wrapping into a different one. -/
+def ofInt (i : Int) (_h : -2 ^ 64 ≤ i ∧ i < 2 ^ 64 := by decide) : Key :=
+  if 0 ≤ i then .uint i.toNat.toUInt64 else .nint (-1 - i).toNat.toUInt64
+
+def ofText (s : String) (h : s.utf8ByteSize < 2 ^ 64 := by decide) : Key := .text s h
+
 def toInt? : Key → Option Int
   | .uint n => some n.toNat
   | .nint n => some (-1 - n.toNat)
@@ -201,9 +208,9 @@ end Key
 The items underlying a list of `Value`s are bounded throughout. This is what lets `Value.array`
 build a bounded item from values without checking them again.
 
-`xs.map (·.item)` takes the item out of each value, and `Item.boundedList` answers `true` when every
-one of those is bounded; each is, by the proof its `Value` carries, so the equation holds for every
-list of values.
+`xs.map (·.item)` takes the item out of each value, and `Item.boundedList` answers `true` when
+every one of those is bounded; each is, by the proof its `Value` carries, so the equation holds for
+every list of values.
 -/
 private theorem boundedList_map (xs : List Value) : Item.boundedList (xs.map (·.item)) = true := by
   simp [Item.boundedList_eq_all, Value.isBounded]
@@ -259,6 +266,9 @@ def ofInt? (i : Int) : Option Value :=
 
 def ofKey (k : Key) : Value := ⟨k.toItem, by cases k <;> rfl⟩
 
+/-- `Value.int (-7)` is the integer -7. -/
+def int (i : Int) (h : -2 ^ 64 ≤ i ∧ i < 2 ^ 64 := by decide) : Value := ofKey (Key.ofInt i h)
+
 def toInt? (v : Value) : Option Int :=
   match v.item with
   | .uint n => some n.toNat
@@ -280,7 +290,8 @@ def reprByteLimit : Nat := 32
 
 def formatBytes (b : ByteArray) : Std.Format :=
   let shown := b.toList.take reprByteLimit
-  let hex := String.ofList (shown.flatMap fun (x : UInt8) => [hexDigit (x >>> 4), hexDigit (x &&& 15)])
+  let hex := String.ofList
+    (shown.flatMap fun (x : UInt8) => [hexDigit (x >>> 4), hexDigit (x &&& 15)])
   if b.size ≤ reprByteLimit then s!"h'{hex}'" else s!"h'{hex}…' ({b.size} bytes)"
 
 def formatKey : Key → Std.Format

@@ -87,7 +87,8 @@ def readHead (input : ByteArray) (pos : Nat) : Except Error (Head × After input
 def readSlice (input : ByteArray) (pos p : Nat) (hp : pos < p) (n : UInt64) :
     Except Error ({b : ByteArray // b.size < 2 ^ 64} × After input pos) :=
   if h : p + n.toNat ≤ input.size then
-    .ok (⟨input.extract p (p + n.toNat), by rw [ByteArray.size_extract, Nat.min_eq_left h]; have := n.toNat_lt; omega⟩,
+    .ok (⟨input.extract p (p + n.toNat), by
+        rw [ByteArray.size_extract, Nat.min_eq_left h]; have := n.toNat_lt; omega⟩,
       ⟨p + n.toNat, by omega, h⟩)
   else .error ⟨.lengthExceedsInput, pos⟩
 
@@ -167,7 +168,8 @@ decreasing_by all_goals (apply Prod.Lex.left; omega)
 def items (input : ByteArray) (depth start pos count : Nat) (hstart : start ≤ pos)
     (hpos : pos ≤ input.size) (remaining : Nat) (acc : List Value)
     (hacc : acc.length + remaining = count) :
-    Except Error ({xs : List Value // xs.length = count} × {q : Nat // start ≤ q ∧ q ≤ input.size}) :=
+    Except Error
+      ({xs : List Value // xs.length = count} × {q : Nat // start ≤ q ∧ q ≤ input.size}) :=
   match remaining with
   | 0 => .ok (⟨acc.reverse, by simpa using hacc⟩, ⟨pos, hstart, hpos⟩)
   | r + 1 =>
@@ -185,7 +187,8 @@ def entries (input : ByteArray) (depth start pos count : Nat) (hstart : start �
     (hpos : pos ≤ input.size) (previous : Option ByteArray) (remaining : Nat)
     (acc : List (Key × Value)) (hacc : acc.length + remaining = count) :
     Except Error
-      ({es : List (Key × Value) // es.length = count} × {q : Nat // start ≤ q ∧ q ≤ input.size}) :=
+      ({es : List (Key × Value) // es.length = count} ×
+        {q : Nat // start ≤ q ∧ q ≤ input.size}) :=
   match remaining with
   | 0 => .ok (⟨acc.reverse, by simpa using hacc⟩, ⟨pos, hstart, hpos⟩)
   | r + 1 =>
