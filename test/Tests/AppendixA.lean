@@ -63,6 +63,7 @@ def vectors : List (String × Value) := [
 ]
 
 def checks : List (String × Bool) :=
-  vectors.map fun (h, v) => (s!"Appendix A encode {h}", bytesEq v.encode (hex h))
+  vectors.map (fun (h, v) => (s!"Appendix A encode {h}", bytesEq v.encode (hex h)))
+    ++ vectors.map fun (h, v) => (s!"Appendix A decode {h}", decodesTo (hex h) v)
 
 end Tests.AppendixA

@@ -17,6 +17,16 @@ def hex (s : String) : ByteArray := (Leancrypto.Codec.Hex.decodeString s).getD .
 
 def key (s : String) (h : s.utf8ByteSize < 2 ^ 64 := by decide) : Cbor.Key := .text s h
 
+def decodesTo (input : ByteArray) (v : Cbor.Value) : Bool :=
+  match Cbor.decode input with
+  | .ok w => w == v
+  | .error _ => false
+
+def refuses (input : ByteArray) (reason : Cbor.Reason) (offset : Nat) : Bool :=
+  match Cbor.decode input with
+  | .ok _ => false
+  | .error e => e.reason == reason && e.offset == offset
+
 def bytesEq (a b : ByteArray) : Bool := a.toList == b.toList
 
 end Tests

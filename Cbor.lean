@@ -8,3 +8,5 @@ public import Cbor.Order
 public import Cbor.Value
 public import Cbor.Head
 public import Cbor.Encode
+public import Cbor.Error
+public import Cbor.Decode
