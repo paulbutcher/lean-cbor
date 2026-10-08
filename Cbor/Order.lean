@@ -19,19 +19,15 @@ def majorType : List UInt8 → UInt8
   | [] => 0
   | b :: _ => b >>> 5
 
-def lex : List UInt8 → List UInt8 → Ordering
-  | [], [] => .eq
-  | [], _ :: _ => .lt
-  | _ :: _, [] => .gt
-  | a :: as, b :: bs => (compare a b).then (lex as bs)
-
-def compareLists (a b : List UInt8) : Ordering :=
-  (compare (majorType a) (majorType b)).then ((compare a.length b.length).then (lex a b))
+/-- Built from `compareLex` so that it inherits core's proofs that such a chain is a total
+preorder; sorting by it relies on that. -/
+def compareLists : List UInt8 → List UInt8 → Ordering :=
+  compareLex (compareOn majorType) (compareLex (compareOn List.length) compare)
 
 /-- `.lt` when the key encoded as `a` precedes the one encoded as `b`, and `.eq` exactly when the
 two encodings are the same bytes, so one call answers both the ordering and the duplicate
 question. -/
 def compareEncoded (a b : ByteArray) : Ordering :=
-  compareLists a.toList b.toList
+  compareLists a.data.toList b.data.toList
 
 end Cbor.Order

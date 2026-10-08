@@ -19,9 +19,9 @@ trip yields, the normalised value, is a function a theorem can name.
 namespace Cbor
 
 def Key.push (out : ByteArray) : Key → ByteArray
-  | .uint n => Head.push out Head.unsigned n
-  | .nint n => Head.push out Head.negative n
-  | .text s _ => Head.push out Head.textString s.utf8ByteSize.toUInt64 ++ s.toUTF8
+  | .uint n => Head.push out Head.unsigned n.toNat
+  | .nint n => Head.push out Head.negative n.toNat
+  | .text s _ => Head.push out Head.textString s.utf8ByteSize ++ s.toUTF8
 
 def Key.encode (k : Key) : ByteArray := k.push .empty
 
@@ -30,15 +30,15 @@ namespace Item
 mutual
 /-- Writes the item with map entries in the order they are held, sorted or not. -/
 def push (out : ByteArray) : Item → ByteArray
-  | .uint n => Head.push out Head.unsigned n
-  | .nint n => Head.push out Head.negative n
-  | .bytes b _ => Head.push out Head.byteString b.size.toUInt64 ++ b
-  | .text s _ => Head.push out Head.textString s.utf8ByteSize.toUInt64 ++ s.toUTF8
-  | .array xs => pushList (Head.push out Head.array xs.length.toUInt64) xs
-  | .map es => pushEntries (Head.push out Head.map es.length.toUInt64) es
-  | .bool false => Head.push out Head.simple Head.falseValue.toUInt64
-  | .bool true => Head.push out Head.simple Head.trueValue.toUInt64
-  | .null => Head.push out Head.simple Head.nullValue.toUInt64
+  | .uint n => Head.push out Head.unsigned n.toNat
+  | .nint n => Head.push out Head.negative n.toNat
+  | .bytes b _ => Head.push out Head.byteString b.size ++ b
+  | .text s _ => Head.push out Head.textString s.utf8ByteSize ++ s.toUTF8
+  | .array xs => pushList (Head.push out Head.array xs.length) xs
+  | .map es => pushEntries (Head.push out Head.map es.length) es
+  | .bool false => Head.push out Head.simple Head.falseValue
+  | .bool true => Head.push out Head.simple Head.trueValue
+  | .null => Head.push out Head.simple Head.nullValue
 
 def pushList (out : ByteArray) : List Item → ByteArray
   | [] => out
@@ -75,9 +75,10 @@ def strictlyIncreasing : List ByteArray → Bool
   | a :: b :: rest => Order.compareEncoded a b == .lt && strictlyIncreasing (b :: rest)
   | _ => true
 
+/-- Sorts the entries as `normalise` does, so that a map passing this is one `normalise` leaves
+strictly increasing. -/
 def keysDistinct (es : List (Key × Item)) : Bool :=
-  strictlyIncreasing
-    ((es.map (·.1.encode)).mergeSort fun a b => Order.compareEncoded a b != .gt)
+  strictlyIncreasing ((es.mergeSort entryPrecedes).map (·.1.encode))
 
 mutual
 def distinctKeys : Item → Bool

@@ -31,15 +31,24 @@ inductive Head where
   | map (n : UInt64)
   | simple (v : Value)
 
+/-- Major types 0 to 5, the ones whose argument is a number or a length. -/
+def Head.ofMajor (major : Nat) (n : UInt64) : Head :=
+  if major == 0 then .uint n
+  else if major == 1 then .nint n
+  else if major == 2 then .bytes n
+  else if major == 3 then .text n
+  else if major == 4 then .array n
+  else .map n
+
 /-- A position strictly past `pos` and no further than the end of `input`. -/
 abbrev After (input : ByteArray) (pos : Nat) := {p : Nat // pos < p ∧ p ≤ input.size}
 
-def bigEndian (bytes : List UInt8) : UInt64 :=
-  bytes.foldl (fun acc b => acc <<< 8 ||| b.toUInt64) 0
+def bigEndian (bytes : List UInt8) : Nat :=
+  bytes.foldl (fun acc b => acc * 256 + b.toNat) 0
 
 /-- The width of the argument that additional information 24 to 27 announces, and the least
 argument that needs that width. Anything smaller had a shorter head. -/
-def argumentForm (info : UInt8) : Nat × UInt64 :=
+def argumentForm (info : Nat) : Nat × Nat :=
   if info == 24 then (1, 24)
   else if info == 25 then (2, 0x100)
   else if info == 26 then (4, 0x10000)
@@ -47,38 +56,30 @@ def argumentForm (info : UInt8) : Nat × UInt64 :=
 
 def readHead (input : ByteArray) (pos : Nat) : Except Error (Head × After input pos) :=
   if h : pos < input.size then
-    let b := input[pos]
-    let major := b >>> 5
-    let info := b &&& 31
+    let major := input[pos].toNat / 32
+    let info := input[pos].toNat % 32
     let fail (reason : Reason) : Except Error (Head × After input pos) := .error ⟨reason, pos⟩
     let next : After input pos := ⟨pos + 1, by omega, by omega⟩
     if major == 7 then
       if info == 20 then .ok (.simple (.bool false), next)
       else if info == 21 then .ok (.simple (.bool true), next)
       else if info == 22 then .ok (.simple .null, next)
-      else if 25 ≤ info && info ≤ 27 then fail .float
-      else if 28 ≤ info && info ≤ 30 then fail .reservedInfo
+      else if 25 ≤ info ∧ info ≤ 27 then fail .float
+      else if 28 ≤ info ∧ info ≤ 30 then fail .reservedInfo
       else if info == 31 then fail .unexpectedBreak
       else fail .unsupportedSimple
-    else if 28 ≤ info && info ≤ 30 then fail .reservedInfo
+    else if 28 ≤ info ∧ info ≤ 30 then fail .reservedInfo
     else if info == 31 then
-      if 2 ≤ major && major ≤ 5 then fail .indefiniteLength else fail .reservedInfo
+      if 2 ≤ major ∧ major ≤ 5 then fail .indefiniteLength else fail .reservedInfo
     else if major == 6 then fail .tag
     else
-      let build (n : UInt64) : Head :=
-        if major == 0 then .uint n
-        else if major == 1 then .nint n
-        else if major == 2 then .bytes n
-        else if major == 3 then .text n
-        else if major == 4 then .array n
-        else .map n
-      if info < 24 then .ok (build info.toUInt64, next)
+      if info < 24 then .ok (Head.ofMajor major (UInt64.ofNat info), next)
       else
         let (width, least) := argumentForm info
         if hw : pos + 1 + width ≤ input.size then
-          let n := bigEndian (input.extract (pos + 1) (pos + 1 + width)).toList
+          let n := bigEndian (input.extract (pos + 1) (pos + 1 + width)).data.toList
           if n < least then fail .nonMinimalHead
-          else .ok (build n, ⟨pos + 1 + width, by omega, hw⟩)
+          else .ok (Head.ofMajor major (UInt64.ofNat n), ⟨pos + 1 + width, by omega, hw⟩)
         else .error ⟨.truncated, input.size⟩
   else .error ⟨.truncated, pos⟩
 

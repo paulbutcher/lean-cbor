@@ -144,18 +144,23 @@ theorem boundedEntries_eq_all (es : List (Key × Item)) :
   | nil => simp [boundedEntries]
   | cons e es ih => obtain ⟨_, _⟩ := e; simp [boundedEntries, ih]
 
+mutual
 /-- Arrays and maps nest at most `depth` deep. It stops descending at the bound, so it is safe on
 the over-deep values it exists to catch. -/
-def withinDepth (depth : Nat) : Item → Bool
-  | .array xs => match depth with
-    | 0 => false
-    | d + 1 => xs.attach.all fun ⟨x, _⟩ => x.withinDepth d
-  | .map es => match depth with
-    | 0 => false
-    | d + 1 => es.attach.all fun ⟨e, _⟩ => e.2.withinDepth d
-  | _ => true
-termination_by depth
-decreasing_by all_goals omega
+def withinDepth : Nat → Item → Bool
+  | 0, .array _ | 0, .map _ => false
+  | d + 1, .array xs => withinDepthList d xs
+  | d + 1, .map es => withinDepthEntries d es
+  | _, _ => true
+
+def withinDepthList (depth : Nat) : List Item → Bool
+  | [] => true
+  | x :: xs => x.withinDepth depth && withinDepthList depth xs
+
+def withinDepthEntries (depth : Nat) : List (Key × Item) → Bool
+  | [] => true
+  | (_, x) :: es => x.withinDepth depth && withinDepthEntries depth es
+end
 
 end Item
 

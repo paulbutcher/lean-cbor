@@ -19,7 +19,7 @@ package «cbor-test» where
 and it means a test file that nothing imports is still compiled. -/
 @[default_target]
 lean_lib Tests where
-  globs := #[`Tests.*]
+  globs := #[`Tests.+]
 
 @[default_target, test_driver]
 lean_exe tests where
