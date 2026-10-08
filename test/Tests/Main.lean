@@ -4,12 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 module
 
+import Tests.AppendixA
+import Tests.Encode
+
 /-!
 Theorems pass by compiling. What runs here are the fixtures, whose value is agreement with bytes
 no proof could establish.
 -/
 
-def checks : List (String × Bool) := []
+def checks : List (String × Bool) := Tests.AppendixA.checks ++ Tests.Encode.checks
 
 public def main : IO UInt32 := do
   let failed := checks.filter fun (_, passed) => !passed
