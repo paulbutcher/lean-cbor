@@ -6,7 +6,7 @@ import Lake
 open Lake DSL
 
 package cbor where
-  version := v!"0.1.0"
+  version := v!"0.1.1"
   leanOptions := #[
     ⟨`autoImplicit, false⟩,
     ⟨`relaxedAutoImplicit, false⟩,
