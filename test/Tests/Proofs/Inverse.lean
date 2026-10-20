@@ -233,7 +233,7 @@ theorem readHead_inv {input : ByteArray} {pos p : Nat} {H : Decode.Head} {hp}
     rw [hi]
     conv => lhs; rw [hbv]
     unfold Head.push
-    rw [if_pos (by omega)]
+    rw [ite_eq_left (by omega)]
     simp
   · have hi : 24 ≤ B.toNat % 32 ∧ B.toNat % 32 ≤ 27 := by omega
     generalize hform : Decode.argumentForm (B.toNat % 32) = form at *

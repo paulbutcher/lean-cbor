@@ -45,7 +45,7 @@ theorem readHead_simple {v : Nat} {val : Value}
     rw [hx]; exact initial_toNat (by omega) (by omega)
   refine ⟨⟨by omega, by omega⟩, ?_⟩
   unfold Decode.readHead
-  rw [dif_pos hp]
+  rw [dite_eq_left hp]
   have h1 : (7 * 32 + v) / 32 = 7 := by omega
   have h2 : (7 * 32 + v) % 32 = v := by omega
   simp only [hv', h1, h2]
@@ -319,7 +319,7 @@ theorem item_ok : (x : Item) → ∀ (d : Nat) (input : ByteArray) (pos : Nat),
       show (4 == 2) = false from rfl, show (4 == 3) = false from rfl,
       show (4 == 4) = true from rfl, Bool.false_eq_true, ↓reduceIte]
     simp only [UInt64.toNat_ofNat_of_lt' hlen]
-    rw [if_pos (by have := size_eq_length (Item.pushList .empty xs); omega)]
+    rw [ite_eq_left (by have := size_eq_length (Item.pushList .empty xs); omega)]
     rw [hitems]
     simp only [Except.ok.injEq, Prod.mk.injEq, Subtype.mk.injEq]
     constructor <;> first | trivial | exact hend
@@ -358,7 +358,7 @@ theorem item_ok : (x : Item) → ∀ (d : Nat) (input : ByteArray) (pos : Nat),
       show (5 == 2) = false from rfl, show (5 == 3) = false from rfl,
       show (5 == 4) = false from rfl, Bool.false_eq_true, ↓reduceIte]
     simp only [UInt64.toNat_ofNat_of_lt' hlen]
-    rw [if_pos (by have := size_eq_length (Item.pushEntries .empty es); omega)]
+    rw [ite_eq_left (by have := size_eq_length (Item.pushEntries .empty es); omega)]
     rw [hentries]
     simp only [Except.ok.injEq, Prod.mk.injEq, Subtype.mk.injEq]
     constructor <;> first | trivial | exact hend

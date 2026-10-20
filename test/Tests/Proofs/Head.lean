@@ -103,7 +103,7 @@ theorem readHead_short {major n : Nat} (hm : major ≤ 5) (hn : n < 24) {input :
     rw [hx]; exact initial_toNat (by omega) (by omega)
   refine ⟨⟨by omega, by omega⟩, ?_⟩
   unfold Decode.readHead
-  rw [dif_pos hp]
+  rw [dite_eq_left hp]
   have h1 : (major * 32 + n) / 32 = major := by omega
   have h2 : (major * 32 + n) % 32 = n := by omega
   simp only [hv, h1, h2]
@@ -137,7 +137,7 @@ theorem readHead_wide {major n info width least : Nat} (hm : major ≤ 5)
     simpa [length_be] using this
   refine ⟨⟨by omega, by omega⟩, ?_⟩
   unfold Decode.readHead
-  rw [dif_pos hp]
+  rw [dite_eq_left hp]
   have h1 : (major * 32 + info) / 32 = major := by omega
   have h2 : (major * 32 + info) % 32 = info := by omega
   simp only [hv, h1, h2, hform, hext, bigEndian_be hn]

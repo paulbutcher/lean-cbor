@@ -85,6 +85,6 @@ theorem decode_trailing (v : Value) (hk : v.distinctKeys = true) (hd : v.withinD
     rw [hpre] at h
     simp only [Except.map, Except.ok.injEq, Prod.mk.injEq] at h
     obtain ⟨_, rfl⟩ := h
-    rw [if_neg (by simp [ByteArray.size_append, hr])]
+    rw [ite_eq_right (by simp [ByteArray.size_append, hr])]
 
 end Tests.Proofs

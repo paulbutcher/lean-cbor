@@ -122,7 +122,7 @@ theorem readSlice_ok {input : ByteArray} {pos p : Nat} {hp : pos < p} {n : UInt6
       .ok (⟨input.extract p (p + n.toNat), hb⟩, ⟨p + n.toNat, hq⟩) := by
   have hle := h.le_size' hsize
   unfold Decode.readSlice
-  rw [dif_pos (by omega)]
+  rw [dite_eq_left (by omega)]
   exact ⟨_, _, rfl⟩
 
 /--
@@ -156,7 +156,7 @@ theorem readText_ok {input : ByteArray} {pos p : Nat} {hp : pos < p} {n : UInt64
   unfold Decode.readText
   rw [hr]
   simp only
-  rw [dif_pos (hext ▸ s.isValidUTF8)]
+  rw [dite_eq_left (hext ▸ s.isValidUTF8)]
   refine ⟨by have := n.toNat_lt; omega, hq, ?_⟩
   simp only [Except.ok.injEq, Prod.mk.injEq, and_true]
   exact Subtype.ext (fromUTF8_eq _ _ hext)
