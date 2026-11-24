@@ -7,7 +7,7 @@ open Lake DSL
 
 require cbor from ".."
 
-require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.4.2"
+require leancrypto from git "https://github.com/paulbutcher/leancrypto" @ "v0.5.0"
 
 package «cbor-test» where
   leanOptions := #[
